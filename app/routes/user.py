@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
 from app.dependencies import get_current_user
+from app.schemas import UserCreate
 
 router = APIRouter()
 
@@ -35,5 +36,20 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
     if not user:
         return {"error": "User not found"}
-
     return user
+@router.put("/users/{user_id}")
+def update_user(
+    user_id: int,
+    updated_user: UserCreate,
+    db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        return{"error": "User not found"}
+    user.name =updated_user.name
+    user.age = updated_user.age
+    user.email = updated_user.email
+    db.commit()
+    db.refresh(user)
+    
+    return{"message": "User updated", "user": user}
