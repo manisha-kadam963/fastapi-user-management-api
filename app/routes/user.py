@@ -37,6 +37,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     if not user:
         return {"error": "User not found"}
     return user
+
 @router.put("/users/{user_id}")
 def update_user(
     user_id: int,
@@ -53,3 +54,15 @@ def update_user(
     db.refresh(user)
     
     return{"message": "User updated", "user": user}
+#delete method
+@router.delete("/users/{user_id}")
+def delete_user(
+    user_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        return{"error": "User not found"}
+    db.delete(user)
+    db.commit()
